@@ -72,7 +72,15 @@ try:
 
         for tab, name in zip(tabs,tab_names):
             with tab:
-                render_mine_tab(name,df[name],chart_type, anomaly_params,trendline_degree)
+                render_mine_tab(
+                    name=name,
+                    series=df[name],
+                    chart_type=chart_type, 
+                    anomaly_params=anomaly_params,
+                    trendline_degree=trendline_degree,
+                    df=df,
+                    mines=mines
+                )
     
     with st.expander("Raw data (debug)"):
         st.dataframe(df, width='stretch')

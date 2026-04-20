@@ -79,3 +79,22 @@ def build_chart(
         margin=dict(l=40, r=20, t=50, b=40),
     )
     return fig
+
+def build_stacked_chart(df: pd.DataFrame, mines: list[str])-> go.Figure:
+    fig = go.Figure()
+    for mine in mines:
+        fig.add_trace(go.Bar(
+            x=df.index,
+            y=df[mine],
+            name=mine
+        ))
+    fig.update_layout(
+        title="Total Daily Output Stacked by Mine",
+        xaxis_title="Date",
+        yaxis_title="Output",
+        barmode='stack',
+        hovermode='x unified',
+        height=450,
+        margin=dict(l=40, r=20, t=50, b=40),
+    )
+    return fig
