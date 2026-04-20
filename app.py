@@ -15,7 +15,7 @@ st.caption("Daily statistics and anomaly detection")
 with st.sidebar:
     st.header("Data Source")
     csv_url = st.text_input("CSV URL", value=DEFAULT_CSV_URL)
-    if st.sidebar.button("Refresh data", width="stretch"):
+    if st.button("Refresh data", width="stretch"):
         st.cache_data.clear()
         st.rerun()
     # st.caption("Last-fetched timestamp: ") <-- Cool feature to add later !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -23,6 +23,29 @@ with st.sidebar:
     st.divider()
     st.header("Controls")
     chart_type = st.selectbox("Chart type", options=["Line", "Bar"])
+
+    st.divider()
+    st.header("Anomaly Detection")
+    with st.expander("IQR rule", expanded=True):
+        iqr_enabled = st.checkbox("Enable IQR", value=True)
+        iqr_k = st.slider("k multiplier", min_value=1.0, max_value=3.0, value=1.5, step=0.1)
+    with st.expander("Z-score"):
+        zscore_enabled = st.checkbox("Enable Z-score", value=False)
+        zscore_threshold = st.slider("Threshold (σ)", min_value=1.0, max_value=4.0, value=3.0, step=0.1)
+    with st.expander("Moving average"):
+        ma_enabled = st.checkbox("Enable moving avg", value=False)
+        ma_window = st.slider("Window (days)", min_value=3, max_value=21, value=7, step=2)
+        ma_threshold = st.slider("Threshold (%)", min_value=5.0, max_value=50.0, value=20.0, step=1.0)
+
+anomaly_params = {
+    'iqr_enabled': iqr_enabled,
+    'iqr_k': iqr_k,
+    'zscore_enabled': zscore_enabled,
+    'zscore_threshold': zscore_threshold,
+    'ma_enabled': ma_enabled,
+    'ma_window': ma_window,
+    'ma_threshold': ma_threshold,
+}
 
 try:
     df = load_data(csv_url)
@@ -39,7 +62,7 @@ try:
 
         for tab, name in zip(tabs,tab_names):
             with tab:
-                render_mine_tab(name,df[name],chart_type)
+                render_mine_tab(name,df[name],chart_type, anomaly_params)
     
     with st.expander("Raw data (debug)"):
         st.dataframe(df, width='stretch')
