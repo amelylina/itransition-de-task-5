@@ -27,7 +27,7 @@ with st.sidebar:
     st.divider()
     st.header("Anomaly Detection")
     with st.expander("IQR rule", expanded=True):
-        iqr_enabled = st.checkbox("Enable IQR", value=True)
+        iqr_enabled = st.checkbox("Enable IQR", value=False)
         iqr_k = st.slider("k multiplier", min_value=1.0, max_value=3.0, value=1.5, step=0.1)
     with st.expander("Z-score"):
         zscore_enabled = st.checkbox("Enable Z-score", value=False)
@@ -36,6 +36,9 @@ with st.sidebar:
         ma_enabled = st.checkbox("Enable moving avg", value=False)
         ma_window = st.slider("Window (days)", min_value=3, max_value=21, value=7, step=2)
         ma_threshold = st.slider("Threshold (%)", min_value=5.0, max_value=50.0, value=20.0, step=1.0)
+    with st.expander("Grubbs' test"):
+        grubbs_enabled = st.checkbox("Enable Grubbs'", value=False)
+        grubbs_alpha = st.slider("Significance α", min_value=0.01, max_value=0.10, value=0.05, step=0.01)
 
 anomaly_params = {
     'iqr_enabled': iqr_enabled,
@@ -45,6 +48,8 @@ anomaly_params = {
     'ma_enabled': ma_enabled,
     'ma_window': ma_window,
     'ma_threshold': ma_threshold,
+    'grubbs_enabled': grubbs_enabled,
+    'grubbs_alpha': grubbs_alpha,
 }
 
 try:

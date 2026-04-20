@@ -28,7 +28,12 @@ def build_chart(
         ))
 
     if anomalies:
-        colors = {'IQR': '#e74c3c', 'Z-score': '#f39c12', 'MovingAvg': '#9b59b6'}
+        colors = {
+            'IQR': '#e74c3c', 
+            'Z-score': '#f39c12', 
+            'MovingAvg': "#e218ed",
+            'Grubbs': "#1ee1c1",
+        }
         for test_name, mask in anomalies.items():
             if not mask.any():
                 continue

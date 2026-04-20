@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from src.charts import build_chart
-from src.stats import compute_stats, detect_iqr, detect_zscore, detect_moving_avg
+from src.stats import compute_stats, detect_iqr, detect_zscore, detect_moving_avg, detect_grubbs
 
 def compute_all_anomalies(series: pd.Series, params: dict)-> dict[str, pd.Series]:
     results = {}
@@ -11,6 +11,8 @@ def compute_all_anomalies(series: pd.Series, params: dict)-> dict[str, pd.Series
         results['Z-score'] = detect_zscore(series, params['zscore_threshold'])
     if params['ma_enabled']:
         results['MovingAvg'] = detect_moving_avg(series, params['ma_window'], params['ma_threshold'])
+    if params['grubbs_enabled']:
+        results['Grubbs'] = detect_grubbs(series, params['grubbs_alpha'])
     return results
 
 def render_mine_tab(name: str, series: pd.Series, chart_type: str, anomaly_params: dict):

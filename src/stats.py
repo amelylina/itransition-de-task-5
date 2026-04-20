@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy.stats import t as student_t
 
 def compute_stats(series: pd.Series) -> dict:
     q1, q3 = np.percentile(series, [25, 75])
@@ -31,3 +32,28 @@ def detect_moving_avg(series: pd.Series, window: int=7, threshold: float=20.0)->
     rolling_mean = series.rolling(window=window, center=True, min_periods=1).mean()
     pct_deviation = ((series - rolling_mean).abs()/rolling_mean)*100
     return pct_deviation > threshold
+
+def detect_grubbs(series: pd.Series, alpha: float=0.05)-> pd.Series:
+    remaining = series.copy()
+    flagged_mask = pd.Series(False,index=series.index)
+    while len(remaining)>=3:
+        mean = remaining.mean()
+        std = remaining.std()
+        if std == 0:
+            break
+
+        deviations = (remaining-mean).abs()
+        most_extreme_idx = deviations.idxmax()
+        G= deviations.loc[most_extreme_idx]/std
+        
+        N = len(remaining)
+        t_crit= student_t.ppf(1-alpha/(2*N), df=N-2)
+        G_crit = ((N-1)/np.sqrt(N)*np.sqrt(t_crit**2/(N-2+t_crit**2)))
+
+        if G>G_crit:
+            flagged_mask.loc[most_extreme_idx]=True
+            remaining = remaining.drop(most_extreme_idx)
+        else:
+            break
+
+    return flagged_mask
