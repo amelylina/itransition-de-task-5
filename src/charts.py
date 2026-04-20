@@ -1,11 +1,19 @@
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
+
+def compute_trendline(series: pd.Series, degree: int)-> np.ndarray:
+    x = np.arange(len(series))
+    y = series.values
+    coeffs = np.polyfit(x, y, degree)
+    return np.polyval(coeffs, x)
 
 def build_chart(
         name: str, 
         series: pd.Series, 
         chart_type: str = "Line",
-        anomalies: dict[str, pd.Series] | None = None
+        anomalies: dict[str, pd.Series] | None = None,
+        trendline_degree: int | None = None
 )-> go.Figure:
     dates = series.index
     values = series.values
@@ -25,6 +33,16 @@ def build_chart(
             x=dates,
             y=values,
             name=name
+        ))
+
+    if trendline_degree:
+        trend_y = compute_trendline(series, trendline_degree)
+        fig.add_trace(go.Scatter(
+            x=dates,
+            y=trend_y,
+            mode='lines',
+            name=f"Trend (degree {trendline_degree})",
+            line=dict(width=3, dash='dash', color='#34495e'),
         ))
 
     if anomalies:

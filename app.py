@@ -22,7 +22,12 @@ with st.sidebar:
     
     st.divider()
     st.header("Controls")
-    chart_type = st.selectbox("Chart type", options=["Line", "Bar"])
+    chart_type = st.selectbox("Chart type", options=["Line", "Bar", "Stacked"])
+    trendline_degree = st.selectbox(
+        "Trendline degree",
+        options=[None, 1, 2, 3, 4],
+        format_func=lambda x: "None" if x is None else f"Polynomial {x}",
+    )
 
     st.divider()
     st.header("Anomaly Detection")
@@ -67,7 +72,7 @@ try:
 
         for tab, name in zip(tabs,tab_names):
             with tab:
-                render_mine_tab(name,df[name],chart_type, anomaly_params)
+                render_mine_tab(name,df[name],chart_type, anomaly_params,trendline_degree)
     
     with st.expander("Raw data (debug)"):
         st.dataframe(df, width='stretch')

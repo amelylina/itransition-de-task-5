@@ -15,11 +15,11 @@ def compute_all_anomalies(series: pd.Series, params: dict)-> dict[str, pd.Series
         results['Grubbs'] = detect_grubbs(series, params['grubbs_alpha'])
     return results
 
-def render_mine_tab(name: str, series: pd.Series, chart_type: str, anomaly_params: dict):
+def render_mine_tab(name: str, series: pd.Series, chart_type: str, anomaly_params: dict,trendline_degree: int):
     st.subheader(name)
     render_stats_cards(series)
     anomalies = compute_all_anomalies(series,anomaly_params)
-    fig = build_chart(name, series, chart_type, anomalies)
+    fig = build_chart(name, series, chart_type, anomalies,trendline_degree)
     st.plotly_chart(fig, width="stretch")
     render_anomaly_table(series,anomalies)
 
