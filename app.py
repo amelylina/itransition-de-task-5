@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
-from src.config import DEFAULT_CSV_URL
+from src.config import DEFAULT_CSV_URL, AnomalyParams
 from src.data import load_data, get_mine_columns, ensure_total
-from src.ui import render_mine_tab
+from src.ui import render_mine_tab, render_total_tab
 
 st.set_page_config(
     page_title="Weyland-Yutani Mining Ops",
@@ -64,39 +64,47 @@ with st.sidebar:
     st.header("Debug")
     debug = st.checkbox("Show raw data table")
 
-anomaly_params = {
-    'iqr_enabled': iqr_enabled,
-    'iqr_k': iqr_k,
-    'zscore_enabled': zscore_enabled,
-    'zscore_threshold': zscore_threshold,
-    'ma_enabled': ma_enabled,
-    'ma_window': ma_window,
-    'ma_threshold': ma_threshold,
-    'grubbs_enabled': grubbs_enabled,
-    'grubbs_alpha': grubbs_alpha,
-}
+anomaly_params = AnomalyParams(
+    iqr_enabled=iqr_enabled,
+    iqr_k=iqr_k,
+    zscore_enabled=zscore_enabled,
+    zscore_threshold=zscore_threshold,
+    ma_enabled=ma_enabled,
+    ma_window=ma_window,
+    ma_threshold=ma_threshold,
+    grubbs_enabled=grubbs_enabled,
+    grubbs_alpha=grubbs_alpha,
+)
 
 mines = get_mine_columns(df)
 if not mines:
     st.warning("No mines data in loaded CSV")
     st.stop()
 else:
-    st.success(f"Loaded {len(df)} days × {len(mines)} mines.")
+    with st.sidebar:
+        st.caption(f"Loaded {len(df)} days × {len(mines)} mines")
     df = ensure_total(df,mines)
     tab_names = ['Total'] + mines
     tabs = st.tabs(tab_names)
 
     for tab, name in zip(tabs,tab_names):
         with tab:
-            render_mine_tab(
-                name=name,
-                series=df[name],
-                chart_type=chart_type, 
-                anomaly_params=anomaly_params,
-                trendline_degree=trendline_degree, #type: ignore
-                df=df,
-                mines=mines
+            if name == "Total":
+                render_total_tab(
+                    df=df,
+                    mines=mines, 
+                    chart_type=chart_type, 
+                    anomaly_params=anomaly_params, 
+                    trendline_degree=trendline_degree
             )
+            else:
+                render_mine_tab(
+                    name=name,
+                    series=df[name],
+                    chart_type=chart_type, 
+                    anomaly_params=anomaly_params,
+                    trendline_degree=trendline_degree, #type: ignore
+                )
 
 if debug:
     with st.expander("Raw data (debug)"):
