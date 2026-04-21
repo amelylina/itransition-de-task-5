@@ -83,7 +83,7 @@ def build_chart(
     )
     return fig
 
-def build_stacked_chart(df: pd.DataFrame, mines: list[str])-> go.Figure:
+def build_stacked_chart(df: pd.DataFrame, mines: list[str], trendline_degree: int | None)-> go.Figure:
     fig = go.Figure()
     palette = [
         '#3498db', '#e67e22', '#2ecc71', '#9b59b6', '#1abc9c',
@@ -95,6 +95,16 @@ def build_stacked_chart(df: pd.DataFrame, mines: list[str])-> go.Figure:
             y=df[mine],
             name=mine,
             marker=dict(color=palette[i%len(palette)])
+        ))
+    if trendline_degree:
+        dates = df.index
+        trend_y = compute_trendline(df['Total'], trendline_degree)
+        fig.add_trace(go.Scatter(
+            x=dates,
+            y=trend_y,
+            mode='lines',
+            name=f"Trend (degree {trendline_degree})",
+            line=dict(width=3, dash='dash', color='#34495e'),
         ))
     fig.update_layout(
         title="Total Daily Output Stacked by Mine",

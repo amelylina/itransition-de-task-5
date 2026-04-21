@@ -105,7 +105,7 @@ else:
                     series=df[name],
                     chart_type=chart_type, 
                     anomaly_params=anomaly_params,
-                    trendline_degree=trendline_degree, #type: ignore
+                    trendline_degree=trendline_degree,
                 )
 
     st.divider()

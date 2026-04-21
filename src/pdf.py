@@ -14,14 +14,13 @@ from src.stats import compute_stats, group_anomalies
 from src.charts import build_chart, build_stacked_chart
 from src.ui import compute_all_anomalies
 
-_BASE_TABLE_STYLE = TableStyle([
+_BASE_TABLE_STYLE = [
     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor(BRAND_ACCENT)),
     ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-    ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ('GRID', (0, 0), (-1, -1), 0.6, colors.grey),
     ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor(ROW_ALT)]),
-])
+]
 
 def _figure_to_png_bytes(fig, width=1100, height=450)-> bytes:
     try:
@@ -43,14 +42,7 @@ def _stats_table(series: pd.Series):
         ["Q3", f"{s['q3']:.2f}"],
     ]
     t = Table(data, colWidths=[4*cm, 4*cm])
-    t.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor(BRAND_ACCENT)),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor(ROW_ALT)]),
-    ]))
+    t.setStyle(TableStyle(_BASE_TABLE_STYLE+[('ALIGN', (1, 0), (1, -1), 'RIGHT')]))
     return t
 
 def _anomaly_table_flowable(series: pd.Series, anomalies: dict[str, pd.Series]) -> Table | Paragraph:
@@ -69,15 +61,11 @@ def _anomaly_table_flowable(series: pd.Series, anomalies: dict[str, pd.Series]) 
             row.append("●" if mask.loc[d] else "")
         rows.append(row)
     
-    col_widths = [3*cm, 2.5*cm] + [2*cm] * len(anomalies)
+    col_widths = [3*cm, 2.5*cm] + [3*cm] * len(anomalies)
     t = Table(rows, colWidths=col_widths, repeatRows=1)
-    t.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor(BRAND_ACCENT)),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor(ROW_ALT)]),
+    t.setStyle(TableStyle(_BASE_TABLE_STYLE+[
+        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')
     ]))
     return t
 
@@ -101,15 +89,7 @@ def _settings_table(anomaly_params: AnomalyParams) -> Table | Paragraph:
         return Paragraph("No anomaly detection tests were enabled.", getSampleStyleSheet()['Italic'])
     
     t = Table(rows, colWidths=[4*cm, 2.5*cm, 8*cm])
-    t.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor(BRAND_ACCENT)),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor(ROW_ALT)]),
-    ]))
+    t.setStyle(TableStyle(_BASE_TABLE_STYLE+[('ALIGN', (1, 0), (1, -1), 'RIGHT')]))
     return t
 
 def _page_footer(canvas, doc):
@@ -205,7 +185,7 @@ def generate_pdf(
         story.append(Spacer(1, 0.5*cm))
         
         if chart_type == "Stacked" and name == "Total":
-            fig = build_stacked_chart(df, mines)
+            fig = build_stacked_chart(df, mines,trendline_degree)
         else:
             effective_chart_type = "Bar" if chart_type == "Stacked" else chart_type
             fig = build_chart(name, series, effective_chart_type, anomalies, trendline_degree)
@@ -216,7 +196,7 @@ def generate_pdf(
         story.append(Image(io.BytesIO(img_bytes), width=img_w_cm*cm, height=img_h_cm*cm))
         story.append(Spacer(1, 0.3*cm))
         
-        story.append(Paragraph("<b>Detected anomalies", h3_style))
+        story.append(Paragraph("Detected anomalies", h3_style))
         story.append(Spacer(1, 0.3*cm))
         story.append(_anomaly_table_flowable(series, anomalies))
         story.append(PageBreak())

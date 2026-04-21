@@ -43,7 +43,7 @@ def render_total_tab(
     render_stats_cards(series)
     anomalies = compute_all_anomalies(series, anomaly_params)
     if chart_type == "Stacked":
-        fig = build_stacked_chart(df, mines)
+        fig = build_stacked_chart(df, mines, trendline_degree)
     else:
         fig = build_chart("Total", series, chart_type, anomalies, trendline_degree)
     st.plotly_chart(fig, width="stretch")
