@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
+from datetime import date
 from src.config import DEFAULT_CSV_URL, AnomalyParams
 from src.data import load_data, get_mine_columns, ensure_total
 from src.ui import render_mine_tab, render_total_tab
+from src.pdf import generate_pdf
 
 st.set_page_config(
     page_title="Weyland-Yutani Mining Ops",
@@ -104,6 +106,20 @@ else:
                     chart_type=chart_type, 
                     anomaly_params=anomaly_params,
                     trendline_degree=trendline_degree, #type: ignore
+                )
+
+    st.divider()
+    col_pdf, _ = st.columns([1, 3])
+    with col_pdf:
+        if st.button("Generate PDF Report", type="primary", width="stretch"):
+            with st.spinner("Generating PDF..."):
+                pdf_bytes = generate_pdf(df=df, mines=mines, chart_type=chart_type, trendline_degree=trendline_degree, anomaly_params=anomaly_params)
+                st.download_button(
+                    label="Download PDF",
+                    data=pdf_bytes,
+                    file_name=f"WY_mining_report_{date.today()}.pdf",
+                    mime="application/pdf",
+                    width="stretch",
                 )
 
 if debug:

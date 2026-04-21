@@ -19,20 +19,23 @@ def build_chart(
     values = series.values
     fig = go.Figure()
 
+    PRIMARY_COLOR = '#3498db'
+
     if chart_type == "Line":
         fig.add_trace(go.Scatter(
             x=dates,
             y=values,
             mode='lines+markers',
             name=name,
-            line=dict(width=2),
-            marker=dict(size=5)
+            line=dict(width=2, color=PRIMARY_COLOR),
+            marker=dict(size=5, color=PRIMARY_COLOR)
         ))
     elif chart_type == "Bar":
         fig.add_trace(go.Bar(
             x=dates,
             y=values,
-            name=name
+            name=name,
+            marker=dict(color=PRIMARY_COLOR)
         ))
 
     if trendline_degree:
@@ -82,11 +85,16 @@ def build_chart(
 
 def build_stacked_chart(df: pd.DataFrame, mines: list[str])-> go.Figure:
     fig = go.Figure()
-    for mine in mines:
+    palette = [
+        '#3498db', '#e67e22', '#2ecc71', '#9b59b6', '#1abc9c',
+        '#f39c12', '#34495e', '#16a085', '#e74c3c', '#27ae60',
+    ]
+    for i,mine in enumerate(mines):
         fig.add_trace(go.Bar(
             x=df.index,
             y=df[mine],
-            name=mine
+            name=mine,
+            marker=dict(color=palette[i%len(palette)])
         ))
     fig.update_layout(
         title="Total Daily Output Stacked by Mine",
