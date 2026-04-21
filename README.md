@@ -8,7 +8,7 @@ This project is closely tied to a self made Google spreadsheets generator of fak
 
 Run and deploy the project from your machine or you can access the publicly available option here:
 
-**link**
+### [**DASHBOARD**](https://amelylina-weyland-yutani-mining.streamlit.app)
 
 ## You can:
 - see tabs for total and each mine individually, with statistics and anomaly detection
