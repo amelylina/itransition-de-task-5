@@ -4,7 +4,7 @@ from datetime import datetime
 from src.config import HELPER_COLS, NON_MINE_COLS
 
 @st.cache_data(ttl=60, show_spinner="Fetching data...")
-def load_data(url: str) -> pd.DataFrame:
+def load_data(url: str, refresh_token: int) -> pd.DataFrame:
     df = pd.read_csv(url)
     df = df.dropna(axis=1, how='all')
     df = df.drop(columns=[c for c in HELPER_COLS if c in df.columns])

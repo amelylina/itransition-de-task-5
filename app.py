@@ -19,8 +19,11 @@ with st.sidebar:
     st.header("Data Source")
     csv_url = st.text_input("CSV URL", value=DEFAULT_CSV_URL)
 
+if 'refresh_token' not in st.session_state:
+    st.session_state.refresh_token = 0
+
 try:
-    df = load_data(csv_url)
+    df = load_data(url=csv_url, refresh_token=st.session_state.refresh_token)
 except pd.errors.ParserError:
     st.error("The CSV could not be parsed. Is the URL pointing to a valid published CSV?")
     st.stop()
@@ -33,6 +36,7 @@ except Exception as e:
     
 with st.sidebar:
     if st.button("Refresh data", width="stretch"):
+        st.session_state.refresh_token += 1
         st.cache_data.clear()
         st.rerun()
     if 'fetched_at' in df.attrs:
