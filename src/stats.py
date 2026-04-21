@@ -61,3 +61,12 @@ def detect_grubbs(series: pd.Series, alpha: float=0.05)-> pd.Series:
             break
 
     return flagged_mask
+
+def group_anomalies(mask: pd.Series) -> list[tuple]:
+    if not mask.any():
+        return []
+    groups = (mask != mask.shift()).cumsum()
+    runs = []
+    for _, group_idx in mask[mask].groupby(groups[mask]):
+        runs.append((group_idx.index.min(), group_idx.index.max()))
+    return runs

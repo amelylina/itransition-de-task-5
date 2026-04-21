@@ -73,7 +73,7 @@ def render_anomaly_table(series: pd.Series, anomalies: dict[str, pd.Series]):
     for date in series.index[any_flagged]:
         row = {'Date':date, 'Value': f"{series.loc[date]:.2f}"}
         for test_name,mask in anomalies.items():
-            row[test_name]="✓" if mask.loc[date] else ""
+            row[test_name]="●" if mask.loc[date] else ""
         rows.append(row)
 
     st.markdown("**Detected anomalies**")
