@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 def compute_trendline(series: pd.Series, degree: int)-> np.ndarray:
     x = np.arange(len(series))
     y = series.values
-    coeffs = np.polyfit(x, y, degree)
+    coeffs = np.polyfit(x, y, degree) #type: ignore
     return np.polyval(coeffs, x)
 
 def build_chart(

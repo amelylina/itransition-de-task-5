@@ -3,6 +3,9 @@ import pandas as pd
 from scipy.stats import t as student_t
 
 def compute_stats(series: pd.Series) -> dict:
+    clean = series.dropna()
+    if len(clean)==0:
+        return {'mean': 0, 'median': 0, 'std': 0, 'iqr': 0, 'q1': 0, 'q3': 0} 
     q1, q3 = np.percentile(series, [25, 75])
     return {
         'mean': series.mean(),
@@ -29,7 +32,8 @@ def detect_zscore(series: pd.Series, threshold: float = 3.0)-> pd.Series:
     return z_scores > threshold
 
 def detect_moving_avg(series: pd.Series, window: int=7, threshold: float=20.0)-> pd.Series:
-    rolling_mean = series.rolling(window=window, center=True, min_periods=1).mean()
+    rolling_mean = series.rolling(window=window, center=False, min_periods=1).mean()
+    rolling_mean.replace(0, np.nan)
     pct_deviation = ((series - rolling_mean).abs()/rolling_mean)*100
     return pct_deviation > threshold
 
@@ -51,7 +55,7 @@ def detect_grubbs(series: pd.Series, alpha: float=0.05)-> pd.Series:
         G_crit = ((N-1)/np.sqrt(N)*np.sqrt(t_crit**2/(N-2+t_crit**2)))
 
         if G>G_crit:
-            flagged_mask.loc[most_extreme_idx]=True
+            flagged_mask.loc[most_extreme_idx]=True #type: ignore
             remaining = remaining.drop(most_extreme_idx)
         else:
             break

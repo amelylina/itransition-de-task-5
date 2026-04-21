@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from src.config import DEFAULT_CSV_URL
 from src.data import load_data, get_mine_columns, ensure_total
 from src.ui import render_mine_tab
@@ -15,11 +16,25 @@ st.caption("Daily statistics and anomaly detection")
 with st.sidebar:
     st.header("Data Source")
     csv_url = st.text_input("CSV URL", value=DEFAULT_CSV_URL)
+
+try:
+    df = load_data(csv_url)
+except pd.errors.ParserError:
+    st.error("The CSV could not be parsed. Is the URL pointing to a valid published CSV?")
+    st.stop()
+except (ConnectionError, TimeoutError):
+    st.error("Could not reach the data source. Check your connection or the URL.")
+    st.stop()
+except Exception as e:
+    st.error(f"Failed to load data: {e}. Analysis stopped.")
+    st.stop()
+    
+with st.sidebar:
     if st.button("Refresh data", width="stretch"):
         st.cache_data.clear()
         st.rerun()
-    # st.caption("Last-fetched timestamp: ") <-- Cool feature to add later !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    
+    if 'fetched_at' in df.attrs:
+        st.sidebar.caption(f"Data fetched: {df.attrs['fetched_at']}")
     st.divider()
     st.header("Controls")
     chart_type = st.selectbox("Chart type", options=["Line", "Bar", "Stacked"])
@@ -45,6 +60,10 @@ with st.sidebar:
         grubbs_enabled = st.checkbox("Enable Grubbs'", value=False)
         grubbs_alpha = st.slider("Significance α", min_value=0.01, max_value=0.10, value=0.05, step=0.01)
 
+    st.divider()
+    st.header("Debug")
+    debug = st.checkbox("Show raw data table")
+
 anomaly_params = {
     'iqr_enabled': iqr_enabled,
     'iqr_k': iqr_k,
@@ -57,33 +76,28 @@ anomaly_params = {
     'grubbs_alpha': grubbs_alpha,
 }
 
-try:
-    df = load_data(csv_url)
-    mines = get_mine_columns(df)
-    
-    st.success(f"Loaded {len(df)} days × {len(mines)} mines")
+mines = get_mine_columns(df)
+if not mines:
+    st.warning("No mines data in loaded CSV")
+    st.stop()
+else:
+    st.success(f"Loaded {len(df)} days × {len(mines)} mines.")
+    df = ensure_total(df,mines)
+    tab_names = ['Total'] + mines
+    tabs = st.tabs(tab_names)
 
-    if not mines:
-        st.warning("No mines data in loaded CSV")
-    else:
-        df = ensure_total(df,mines)
-        tab_names = ['Total'] + mines
-        tabs = st.tabs(tab_names)
+    for tab, name in zip(tabs,tab_names):
+        with tab:
+            render_mine_tab(
+                name=name,
+                series=df[name],
+                chart_type=chart_type, 
+                anomaly_params=anomaly_params,
+                trendline_degree=trendline_degree, #type: ignore
+                df=df,
+                mines=mines
+            )
 
-        for tab, name in zip(tabs,tab_names):
-            with tab:
-                render_mine_tab(
-                    name=name,
-                    series=df[name],
-                    chart_type=chart_type, 
-                    anomaly_params=anomaly_params,
-                    trendline_degree=trendline_degree,
-                    df=df,
-                    mines=mines
-                )
-    
+if debug:
     with st.expander("Raw data (debug)"):
         st.dataframe(df, width='stretch')
-
-except Exception as e:
-    st.error(f"Failed to load data: {e}")
