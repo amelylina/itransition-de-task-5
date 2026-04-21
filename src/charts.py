@@ -85,9 +85,13 @@ def build_chart(
 
 def build_stacked_chart(df: pd.DataFrame, mines: list[str], trendline_degree: int | None)-> go.Figure:
     fig = go.Figure()
+    # palette = [
+    #     '#3498db', '#e67e22', '#2ecc71', '#9b59b6', '#1abc9c',
+    #     '#f39c12', '#34495e', '#16a085', '#e74c3c', '#27ae60',
+    # ]
     palette = [
-        '#3498db', '#e67e22', '#2ecc71', '#9b59b6', '#1abc9c',
-        '#f39c12', '#34495e', '#16a085', '#e74c3c', '#27ae60',
+        '#16a085', '#77bfa3', '#004e89', "#2d7ab5", '#758bfd',
+        '#aeb8fe','#E6706C', '#ff99ac', '#FFBC32', '#E48D36',
     ]
     for i,mine in enumerate(mines):
         fig.add_trace(go.Bar(
