@@ -60,9 +60,10 @@ def build_chart(
                 continue
             flagged_dates = series.index[mask]
             flagged_values = series[mask].values
+            y_offset = series.max() * 0.02
             fig.add_trace(go.Scatter(
                 x=flagged_dates,
-                y=flagged_values,
+                y=flagged_values + y_offset,
                 mode='markers',
                 name=f"{test_name} anomaly",
                 marker=dict(
@@ -83,15 +84,16 @@ def build_chart(
     )
     return fig
 
-def build_stacked_chart(df: pd.DataFrame, mines: list[str], trendline_degree: int | None)-> go.Figure:
+def build_stacked_chart(
+        df: pd.DataFrame, 
+        mines: list[str], 
+        trendline_degree: int | None,
+        anomalies: dict[str, pd.Series] | None = None
+)-> go.Figure:
     fig = go.Figure()
-    # palette = [
-    #     '#3498db', '#e67e22', '#2ecc71', '#9b59b6', '#1abc9c',
-    #     '#f39c12', '#34495e', '#16a085', '#e74c3c', '#27ae60',
-    # ]
     palette = [
         '#16a085', '#77bfa3', '#004e89', "#2d7ab5", '#758bfd',
-        '#aeb8fe','#E6706C', '#ff99ac', '#FFBC32', '#E48D36',
+        '#aeb8fe', '#E6706C', '#ff99ac', '#FFBC32', '#E48D36'
     ]
     for i,mine in enumerate(mines):
         fig.add_trace(go.Bar(
@@ -110,6 +112,32 @@ def build_stacked_chart(df: pd.DataFrame, mines: list[str], trendline_degree: in
             name=f"Trend (degree {trendline_degree})",
             line=dict(width=3, dash='dash', color='#34495e'),
         ))
+    if anomalies:
+        colors = {
+            'IQR': '#e74c3c', 
+            'Z-score': '#f39c12', 
+            'MovingAvg': "#9b59b6",
+            'Grubbs': "#1fab8f",
+        }
+        for test_name, mask in anomalies.items():
+            if not mask.any():
+                continue
+            flagged_dates = df.index[mask]
+            flagged_values = df['Total'][mask].values
+            y_offset = df['Total'].max() * 0.02
+            fig.add_trace(go.Scatter(
+                x=flagged_dates,
+                y=flagged_values + y_offset,
+                mode='markers',
+                name=f"{test_name} anomaly",
+                marker=dict(
+                    size=12,
+                    color=colors.get(test_name, 'red'),
+                    symbol='circle-open',
+                    line=dict(width=2),
+                ),
+            ))
+
     fig.update_layout(
         title="Total Daily Output Stacked by Mine",
         xaxis_title="Date",

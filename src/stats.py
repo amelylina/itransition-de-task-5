@@ -21,7 +21,8 @@ def detect_iqr(series: pd.Series, k: float = 1.5)-> pd.Series:
     iqr = q3-q1
     lower = q1-k*iqr
     upper = q3+k*iqr
-    return (series<lower) | (series>upper)
+    mask = (series < lower) | (series > upper)
+    return mask
 
 def detect_zscore(series: pd.Series, threshold: float = 3.0)-> pd.Series:
     mean = series.mean()
