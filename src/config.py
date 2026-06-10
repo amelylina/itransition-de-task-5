@@ -3,7 +3,7 @@ from dataclasses import dataclass
 HELPER_COLS = {'DayOfWeek', 'DayMultiplier', 'TrendMultiplier', 'EventMultiplier'}
 NON_MINE_COLS = HELPER_COLS | {'Total'}
 
-DEFAULT_CSV_URL= "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQkpBuxbA9Vago-goGN1T1pZsa1KrutI5lj85YU2nqFChPVT17DF7qKjaX_CBYdQXyQjE_NTSFWZuM/pub?gid=50105197&single=true&output=csv"
+DEFAULT_CSV_URL= "https://docs.google.com/spreadsheets/d/e/2PACX-1vQogIniSzID50X7MMSCmiYR0HdILDa9AwrAEJsAD7zYRFfmvKBkO6aGAniCaT3gmPW9WWHTiysS-x0z/pub?gid=50105197&single=true&output=csv"
 
 BRAND_DARK = '#2c3e50'
 BRAND_ACCENT = '#536474'
